@@ -8,7 +8,7 @@ const RPC = "https://api.zan.top/node/v1/pharos/testnet/7bbf30cd3a774b4ebbd9750a
 const ADDRESS = "0xdf712323c4b7c67aa3517baa9c1e4c8a924a86cd";
 
 // Jumlah block terakhir untuk dicek
-const BLOCK_SCAN = 1000; // scan 1000 block terakhir
+const BLOCK_SCAN = 200; // scan 200 block terakhir
 
 async function getLastTransactions(provider, address, limit = 5) {
   const currentBlock = await provider.getBlockNumber();
