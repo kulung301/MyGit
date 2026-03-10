@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Airdrop Hunter</title>
+  <style>
+    /* 🌿 Tema Umum */
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background-color: #eafff4;
+      color: #002b1c;
+      overflow-x: hidden;
+    }
+
+    /* 🌿 Navbar */
+    nav {
+      background-color: #00c48c;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    nav .logo {
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    nav ul li a:hover {
+      text-decoration: underline;
+    }
+
+    /* 🌿 Tombol menu (mobile) */
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .bar {
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 4px 0;
+      transition: 0.3s;
+    }
+
+    @media (max-width: 768px) {
+      nav ul {
+        display: none;
+        flex-direction: column;
+        background-color: #00c48c;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        width: 200px;
+        text-align: right;
+        border-radius: 0 0 0 12px;
+      }
+
+      nav ul.active {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: flex;
+      }
+    }
+
+    /* 🌿 Konten */
+    section {
+      display: none;
+      padding: 40px 20px;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #00c48c;
+      width: 250px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background-color: #00c48c;
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    button:hover {
+      background-color: #00a877;
+    }
+
+    ul.project-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      text-align: left;
+      max-width: 400px;
+      margin-inline: auto;
+    }
+
+    ul.project-list li {
+      background: white;
+      border-left: 4px solid #00c48c;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #00c48c;
+      color: white;
+      margin-top: 40px;
+    }
+
+    /* ✨ Animasi */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 🌿 Navbar -->
+  <nav>
+    <div class="logo">Airdrop Hunter</div>
+    <div class="menu-toggle" onclick="toggleMenu()">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+    <ul id="menu">
+      <li><a onclick="showPage('home')">Beranda</a></li>
+      <li><a onclick="showPage('pengenalan')">Pengenalan</a></li>
+      <li><a onclick="showPage('search')">Search Project</a></li>
+      <li><a onclick="showPage('contact')">Contact Us</a></li>
+    </ul>
+  </nav>
+
+  <!-- 🌿 Halaman Beranda -->
+  <section id="home" class="active">
+    <h1>Selamat Datang di Dunia Airdrop</h1>
+    <p>Tempat berburu airdrop dengan panduan yang jelas dan update proyek terbaru.</p>
+  </section>
+
+  <!-- 🌿 Halaman Pengenalan -->
+  <section id="pengenalan">
+    <h1>Apa Itu Airdrop?</h1>
+    <p>Airdrop adalah cara proyek crypto mendistribusikan token gratis untuk memperkenalkan ekosistem mereka.</p>
+    <p>Biasanya kamu hanya perlu melakukan tugas sederhana seperti follow akun X, join Discord, atau uji testnet.</p>
+  </section>
+
+  <!-- 🌿 Halaman Search -->
+  <section id="search">
+    <h1>Cari Proyek Airdrop</h1>
+    <input type="text" id="projectInput" placeholder="Nama proyek..." />
+    <button onclick="addProject()">Tambah Proyek</button>
+
+    <ul class="project-list" id="projectList"></ul>
+  </section>
+
+  <!-- 🌿 Halaman Contact -->
+  <section id="contact">
+    <h1>Hubungi Kami</h1>
+    <p>X: <a href="https://x.com/" target="_blank">@YourXUsername</a></p>
+    <p>Telegram: <a href="https://t.me/" target="_blank">@YourTelegram</a></p>
+    <p>Email: yourname@example.com</p>
+    <p>Discord: YourDiscord#0000</p>
+  </section>
+
+  <!-- 🌿 Footer -->
+  <footer>
+    &copy; 2025 Airdrop Hunter by Asrun
+  </footer>
+
+  <!-- 🌿 Script -->
+  <script>
+    // Navigasi Halaman
+    function showPage(pageId) {
+      document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
+      document.getElementById(pageId).classList.add("active");
+      document.getElementById("menu").classList.remove("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Toggle Menu Mobile
+    function toggleMenu() {
+      document.getElementById("menu").classList.toggle("active");
+    }
+
+    // Tambah Proyek
+    function addProject() {
+      const input = document.getElementById("projectInput");
+      const list = document.getElementById("projectList");
+
+      const name = input.value.trim();
+      if (name === "") {
+        alert("Masukkan nama proyek terlebih dahulu!");
+        return;
+      }
+
+      const li = document.createElement("li");
+      li.textContent = name;
+      list.appendChild(li);
+      input.value = "";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Neon Emerald Dragon — Three.js</title>
+<style>
+  html,body{height:100%;margin:0;background:#000;overflow:hidden}
+  #info{position:fixed;left:12px;top:12px;color:#bfffd6;font-family:system-ui,Arial;font-size:13px;z-index:2}
+  #startBtn{background:#00c48b;border:none;padding:8px 12px;border-radius:8px;color:#001;cursor:pointer}
+  canvas{display:block}
+</style>
+</head>
+<body>
+  <div id="info">
+    <strong>Emerald Neon Dragon</strong><br>
+    Klik layar untuk dorong napas api. <button id="startBtn">Restart animation</button>
+  </div>
+
+<script src="https://unpkg.com/three@0.154.0/build/three.min.js"></script>
+
+<script>
+(() => {
+  // ----- basic three setup -----
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 5000);
+  camera.position.set(0, 40, 220);
+
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:false});
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  document.body.appendChild(renderer.domElement);
+
+  // subtle ambient + point to highlight neon
+  scene.add(new THREE.AmbientLight(0x101010, 1.2));
+  const p = new THREE.PointLight(0x008060, 1.8, 900);
+  p.position.set(0, 60, 120);
+  scene.add(p);
+
+  // color variables
+  const neon = new THREE.Color(0x00ff99);
+  const neon2 = new THREE.Color(0x00c48b);
+
+  // helper: make emissive material for neon lines
+  function neonMat(width=6){
+    return new THREE.MeshBasicMaterial({
+      color: neon,
+      toneMapped: false,
+      transparent: true
+    });
+  }
+
+  // create dragon group (simple segmented body + head + wings)
+  const dragon = new THREE.Group();
+  scene.add(dragon);
+
+  // body segments (spheres)
+  const segmentCount = 9;
+  const segs = [];
+  for(let i=0;i<segmentCount;i++){
+    const r = 6 + (Math.sin(i/segmentCount*Math.PI)*4);
+    const g = new THREE.Mesh(
+      new THREE.SphereGeometry(r, 24, 18),
+      new THREE.MeshBasicMaterial({ color: neon, transparent:true, opacity:1 })
+    );
+    g.scale.set(1,0.6,0.9); // slightly flattened
+    g.position.x = -i*12; // lay along -x
+    dragon.add(g);
+    segs.push(g);
+
+    // add glow sprite
+    const spriteMat = new THREE.SpriteMaterial({
+      map: makeGlowTexture(),
+      color: 0x00ff99,
+      transparent: true,
+      opacity: 0.45,
+      depthWrite: false
+    });
+    const spr = new THREE.Sprite(spriteMat);
+    spr.scale.set(r*6, r*6, 1);
+    g.add(spr);
+  }
+
+  // head
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(10, 28, 16),
+    new THREE.MeshBasicMaterial({ color: neon })
+  );
+  head.position.x = 10;
+  head.position.y = 3;
+  dragon.add(head);
+  // head glow
+  const headGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(), color: 0x00ff99, transparent:true, opacity:0.6, depthWrite:false }));
+  headGlow.scale.set(120,120,1);
+  head.add(headGlow);
+
+  // mouth point (where fire originates)
+  const mouth = new THREE.Object3D();
+  mouth.position.set(18, -2, 0);
+  head.add(mouth);
+
+  // wings (two planes with emissive-like material)
+  const wingGeo = new THREE.PlaneGeometry(120, 70, 8, 4);
+  const wingMat = new THREE.MeshBasicMaterial({ color: neon, side: THREE.DoubleSide, transparent:true, opacity:0.95 });
+  const leftWing = new THREE.Mesh(wingGeo, wingMat);
+  leftWing.position.set(-40,8,40);
+  leftWing.rotation.set(0.1, -0.25, 0.35);
+  leftWing.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(-60,0,0)); // pivot near base
+  leftWing.castShadow = false;
+  dragon.add(leftWing);
+
+  const rightWing = leftWing.clone();
+  rightWing.position.set(-40,8,-40);
+  rightWing.rotation.set(0.1, 0.25, -0.35);
+  dragon.add(rightWing);
+
+  // eyes (tiny neon points)
+  const eyeGeo = new THREE.SphereGeometry(1.6,8,6);
+  const eyeMat = new THREE.MeshBasicMaterial({color: neon});
+  const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
+  eye1.position.set(6,4.5,4);
+  head.add(eye1);
+  const eye2 = eye1.clone();
+  eye2.position.z = -4;
+  head.add(eye2);
+
+  // create fire particle system (Points)
+  const flameCount = 140;
+  const flameGeo = new THREE.BufferGeometry();
+  const positions = new Float32Array(flameCount*3);
+  const sizes = new Float32Array(flameCount);
+  for(let i=0;i<flameCount;i++){
+    positions[i*3+0] = (Math.random()*10); // positive x forward
+    positions[i*3+1] = (Math.random()-0.5)*18;
+    positions[i*3+2] = (Math.random()-0.5)*18;
+    sizes[i] = Math.random()*6+2;
+  }
+  flameGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  flameGeo.setAttribute('size', new THREE.BufferAttribute(sizes,1));
+
+  const flameMat = new THREE.PointsMaterial({
+    size: 18,
+    map: makeFlameTexture(),
+    transparent:true,
+    opacity: 0.9,
+    blending: THREE.AdditiveBlending,
+    depthWrite:false
+  });
+  const flames = new THREE.Points(flameGeo, flameMat);
+  flames.frustumCulled = false;
+  mouth.add(flames); // attach to mouth position
+  flames.visible = false;
+
+  // small spark sprite in front
+  const spark = new THREE.Sprite(new THREE.SpriteMaterial({map: makeGlowTexture(), color: 0x00c48b, transparent:true, opacity:0.9, depthWrite:false}));
+  spark.scale.set(18,18,1);
+  mouth.add(spark);
+  spark.visible = false;
+
+  // timeline control
+  let startTime = performance.now();
+  const cycle = 14000; // 14s loop
+  const wingBaseSpeed = 0.45;
+
+  // helper functions: glow textures
+  function makeGlowTexture(){
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+    grad.addColorStop(0,'rgba(255,255,255,1)');
+    grad.addColorStop(0.2,'rgba(0,255,153,0.95)');
+    grad.addColorStop(0.6,'rgba(0,196,139,0.35)');
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,size,size);
+    const t = new THREE.CanvasTexture(canvas);
+    t.minFilter = THREE.LinearFilter;
+    return t;
+  }
+
+  function makeFlameTexture(){
+    const size = 128;
+    const c = document.createElement('canvas');
+    c.width=c.height=size;
+    const cx=c.getContext('2d');
+    // gradient from white to neon green/dark
+    const g = cx.createRadialGradient(size*0.35, size*0.4, 2, size/2, size/2, size/1.2);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.15, 'rgba(180,255,215,0.95)');
+    g.addColorStop(0.4, 'rgba(0,255,153,0.85)');
+    g.addColorStop(1, 'rgba(0,196,139,0.05)');
+    cx.fillStyle=g;
+    cx.fillRect(0,0,size,size);
+    const t = new THREE.CanvasTexture(c);
+    t.minFilter = THREE.LinearFilter;
+    return t;
+  }
+
+
+  // resize handling
+  window.addEventListener('resize', ()=> {
+    renderer.setSize(innerWidth, innerHeight);
+    camera.aspect = innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+  });
+
+  // click/tap to trigger extra breath
+  renderer.domElement.addEventListener('pointerdown', ()=> {
+    triggerBurst();
+  });
+
+  document.getElementById('startBtn').addEventListener('click', ()=> {
+    startTime = performance.now();
+  });
+
+  // trigger a burst: animate flame visible and animate particles forward
+  function triggerBurst(){
+    flames.visible = true;
+    spark.visible = true;
+    // animate flame opacity and particle spread using simple tween-like logic
+    const t0 = performance.now();
+    const dur = 900;
+    function animateBurst(){
+      const t = (performance.now()-t0)/dur;
+      if(t<1){
+        // expand flame scale by modding size attribute
+        const positions = flameGeo.attributes.position.array;
+        for(let i=0;i<flameCount;i++){
+          const baseX = Math.random()*8 + 6;
+          positions[i*3+0] = baseX + Math.random()*12 * t;
+          positions[i*3+1] = (Math.random()-0.5)*10 * (1-t) + (t*20*Math.random());
+          positions[i*3+2] = (Math.random()-0.5)*20 * (1-t);
+        }
+        flameGeo.attributes.position.needsUpdate = true;
+        requestAnimationFrame(animateBurst);
+      } else {
+        flames.visible = false;
+        spark.visible = false;
+      }
+    }
+    animateBurst();
+  }
+
+
+  // animation loop
+  function animate(){
+    const now = performance.now();
+    let dt = now - startTime;
+    dt = dt % cycle;
+    const t = dt / cycle; // 0..1
+
+    // flight path mapping (piecewise) — returns position {x,y,z}, rotZ, scale
+    const state = flightMap(t);
+    dragon.position.set(state.x, state.y, state.z);
+    dragon.rotation.set(0, state.rotY, 0);
+    dragon.scale.set(state.scale, state.scale, state.scale);
+    // wing flapping speed slightly modulated by state.scale
+    const flapSpeed = wingBaseSpeed * (1 + (state.scale-0.6)*0.6);
+    leftWing.rotation.z = 0.35 * Math.sin((now/1000)* (1/flapSpeed) * 6);
+    rightWing.rotation.z = -0.35 * Math.sin((now/1000)* (1/flapSpeed) * 6);
+
+    // make shimmer stroke dashoffset move
+    const bodyPath = segs[0]; // use first segment as driver
+    // update head look direction slightly
+    head.rotation.y = Math.sin((now/1000)*0.7) * 0.06;
+
+    // fire timing: visible around 0.74..0.82 cycles
+    if(t>0.74 && t<0.82){
+      // breathe continuously in this phase
+      flames.visible = true;
+      spark.visible = true;
+      // animate flame geometry gently
+      const positions = flameGeo.attributes.position.array;
+      for(let i=0;i<flameCount;i++){
+        positions[i*3+0] = 6 + Math.random()*18; // forward
+        positions[i*3+1] = (Math.random()-0.4)*20;
+        positions[i*3+2] = (Math.random()-0.5)*30;
+      }
+      flameGeo.attributes.position.needsUpdate = true;
+    } else {
+      // hide flames by default
+      // (but keep small embers occasionally)
+      flames.visible = false;
+      spark.visible = false;
+    }
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+
+  // flight mapping function — maps normalized t to transform
+  function flightMap(t){
+    // We'll create a composite path using sine + lerps
+    // default
+    let x=0,y=0,z=0, rotY=0, scale=0.6;
+    if(t < 0.08){
+      // rising from bottom
+      const p = t/0.08;
+      x = -50 + 80 * p;
+      y = -120 + 150 * p;
+      z = -60 + 20*p;
+      rotY = -0.6 + 0.8*p;
+      scale = 0.45 + 0.3*p;
+    } else if(t < 0.2){
+      const p = (t-0.08)/0.12;
+      x = -30 + 40*p;
+      y = 30 - 40*p;
+      z = -40 + 40*p;
+      rotY = 0.2 * Math.sin(p*2*Math.PI);
+      scale = 0.75 - 0.1*p;
+    } else if(t < 0.33){
+      const p = (t-0.2)/0.13;
+      // move out to top right and fade out
+      x = 10 + 120*p;
+      y = -10 - 60*p;
+      z = -20 + 80*p;
+      rotY = 0.5 + 0.6*p;
+      scale = 0.6 - 0.2*p;
+    } else if(t < 0.38){
+      // offscreen
+      const p = (t-0.33)/0.05;
+      x = 140 + 40*p; y = -30 + 20*p; z = 80 + 40*p;
+      scale = 0.35;
+      rotY = 1.2;
+    } else if(t < 0.46){
+      const p = (t-0.38)/0.08;
+      // reappear from right -> left
+      x = 140 - 120*p;
+      y = 20 + 10*Math.sin(p*2*Math.PI);
+      z = 30 - 40*p;
+      rotY = 0.8 - 1.2*p;
+      scale = 0.5 + 0.2*p;
+    } else if(t < 0.58){
+      const p = (t-0.46)/0.12;
+      // move away then swirl
+      x = 20 - 40*p + Math.sin(p*Math.PI*4)*10;
+      y = 30 - 60*p;
+      z = -10 + Math.cos(p*Math.PI*3)*40;
+      rotY = Math.sin(p*Math.PI*2)*0.6;
+      scale = 0.7 - 0.15*p;
+    } else if(t < 0.7){
+      const p = (t-0.58)/0.12;
+      // move back towards camera (approach)
+      x = -30 + 40*p + Math.sin(p*Math.PI*3)*8;
+      y = -10 + 40*p;
+      z = 30 - 60*p;
+      rotY = Math.sin(p*Math.PI*2)*0.3;
+      scale = 0.55 + 0.6*p;
+    } else if(t < 0.82){
+      const p = (t-0.7)/0.12;
+      // final approach & meliuk liuk
+      x = -10 + Math.sin(p*Math.PI*4)*8;
+      y = 20 + Math.sin(p*Math.PI*3)*6 - 20*p;
+      z = -40 + (1-p)*40 - Math.cos(p*Math.PI*2)*8;
+      rotY = Math.sin(p*Math.PI*2)*0.15;
+      scale = 1.15 + 0.45*p;
+    } else {
+      const p = (t-0.82)/0.18;
+      // fill screen (zoom)
+      x = -50;
+      y = -30 - 60*p;
+      z = -100 + 120*p;
+      rotY = 0;
+      scale = 1.6 + 0.8*p;
+    }
+    return {x,y,z,rotY,scale};
+  }
+
+  // start loop
+  animate();
+
+  // optional: subtle camera bob
+  let camTick = 0;
+  function camUpdate(){
+    camTick += 0.002;
+    camera.position.x = Math.sin(camTick)*8;
+    camera.position.y = 40 + Math.sin(camTick*0.4)*4;
+    camera.lookAt(0,0,0);
+    requestAnimationFrame(camUpdate);
+  }
+  camUpdate();
+
+  // ready log
+  console.log('Dragon ready — click/tap to trigger flame burst');
+
+})();
+</script>
+</body>
+</html>

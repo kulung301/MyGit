@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Airdrop Hunter</title>
+  <style>
+    /* ===== Mint theme & layout ===== */
+    :root{
+      --bg: #eafff4;
+      --mint: #00c48c;
+      --mint-dark:#009965;
+      --card:#ffffff;
+      --text:#062a20;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Poppins",system-ui,Arial;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* Navbar */
+    nav{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:12px 16px;
+      background:var(--mint);
+      color:#fff;
+      position:sticky;
+      top:0;
+      z-index:100;
+    }
+    .logo{font-weight:700}
+    .menu-toggle{display:none; cursor:pointer}
+    .bar{width:22px;height:3px;background:#fff;margin:3px 0;border-radius:3px}
+
+    ul.menu{display:flex;gap:18px;list-style:none;margin:0;padding:0}
+    ul.menu li a{color:white;text-decoration:none;cursor:pointer;font-weight:600}
+
+    @media(max-width:780px){
+      .menu-toggle{display:flex;flex-direction:column}
+      ul.menu{display:none; position:absolute; right:12px; top:56px; background:var(--mint); flex-direction:column; padding:8px; border-radius:8px; width:180px}
+      ul.menu.active{display:flex}
+      ul.menu li{padding:6px 8px}
+    }
+
+    /* Content area */
+    .wrap{max-width:900px;margin:20px auto;padding:0 16px}
+    section{display:none;padding:18px 0; animation:fadeIn .32s ease}
+    section.active{display:block}
+    h1{margin:0 0 12px;font-size:20px}
+    p{margin:0 0 10px;color:#174f3f}
+
+    /* Search / add area */
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+    .controls input[type="text"], .controls input[type="url"], .controls textarea, .controls select{
+      padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);font-size:14px;
+    }
+    .controls button{background:var(--mint-dark);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600}
+    .controls button.ghost{background:transparent;color:var(--mint-dark);border:1px solid rgba(0,0,0,0.06)}
+
+    /* project list (vertical) */
+    .project-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+    .proj{
+      background:var(--card);border-radius:10px;padding:12px;border-left:4px solid var(--mint);
+      box-shadow:0 6px 18px rgba(0,0,0,0.04);
+    }
+    .proj h3{margin:0 0 6px;font-size:16px;color:var(--mint-dark)}
+    .proj p{margin:0;color:#1f513f;font-size:14px}
+    .proj .meta{margin-top:8px;display:flex;gap:8px;align-items:center}
+    .proj a.link{color:var(--mint);text-decoration:none;font-weight:600}
+    .proj button{background:transparent;border:none;color:var(--mint-dark);cursor:pointer;padding:6px;border-radius:6px}
+    .proj button:hover{background:rgba(0,0,0,0.04)}
+
+    footer{text-align:center;padding:18px;margin-top:26px;color:#184f3d}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">Airdrop Hunter</div>
+
+    <div class="menu-toggle" onclick="toggleMenu()" aria-label="menu">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+
+    <ul class="menu" id="menu">
+      <li><a onclick="showPage('home')">Beranda</a></li>
+      <li><a onclick="showPage('pengenalan')">Pengenalan</a></li>
+      <li><a onclick="showPage('search')">Search Project</a></li>
+      <li><a onclick="showPage('contact')">Contact Us</a></li>
+    </ul>
+  </nav>
+
+  <div class="wrap">
+    <!-- HOME -->
+    <section id="home" class="active">
+      <h1>Selamat Datang</h1>
+      <p>Halaman ini adalah tempat catatan dan daftar proyek airdropmu. Tambah proyek di menu <strong>Search Project</strong>.</p>
+    </section>
+
+    <!-- PENGENALAN -->
+    <section id="pengenalan">
+      <h1>Pengenalan Airdrop & Wallet</h1>
+      <p><strong>Airdrop</strong> = distribusi token gratis oleh proyek crypto. <br>
+      <strong>Wallet</strong> = dompet digital; gunakan wallet terpisah untuk airdrop dan jangan berikan seed.</p>
+      <p>Tip aman: cek domain resmi, gunakan alamat yang berbeda untuk testing, jangan sign pesan berbahaya.</p>
+    </section>
+
+    <!-- SEARCH / PROJECT -->
+    <section id="search">
+      <h1>Daftar Proyek Airdrop</h1>
+
+      <!-- controls: search + add toggle -->
+      <div class="controls">
+        <input type="text" id="searchInput" placeholder="Cari nama proyek..." oninput="renderProjects()">
+        <select id="filterCategory" onchange="renderProjects()">
+          <option value="all">Semua Kategori</option>
+          <option value="testnet">Testnet</option>
+          <option value="social">Social Task</option>
+          <option value="token">Token Claim</option>
+        </select>
+
+        <button onclick="toggleAddForm()">+ Tambah / Edit Proyek</button>
+        <button class="ghost" onclick="clearAll()">Reset Semua</button>
+      </div>
+
+      <!-- form (toggle) -->
+      <div id="formBox" style="display:none;background:var(--card);padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);box-shadow:0 8px 20px rgba(0,0,0,0.04)">
+        <input type="hidden" id="editingId">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="inpName" type="text" placeholder="Nama Proyek (wajib)" style="flex:1">
+          <input id="inpLink" type="url" placeholder="Link (https://...) (opsional)" style="flex:1">
+          <select id="inpCat" style="width:160px">
+            <option value="testnet">Testnet</option>
+            <option value="social">Social Task</option>
+            <option value="token">Token Claim</option>
+          </select>
+        </div>
+        <textarea id="inpDesc" rows="3" placeholder="Keterangan singkat..." style="width:100%;margin-top:8px;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button onclick="saveProject()">Simpan</button>
+          <button class="ghost" onclick="cancelEdit()">Batal</button>
+        </div>
+      </div>
+
+      <!-- list -->
+      <ul class="project-list" id="projectList"></ul>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact">
+      <h1>Contact Us</h1>
+      <p>Edit link di file HTML kalau mau ubah kontak. Atau kita bisa buat UI edit nanti.</p>
+      <p>
+        <a href="https://x.com/yourprofile" target="_blank">🐦 X</a> ·
+        <a href="https://t.me/yourtelegram" target="_blank">💬 Telegram</a> ·
+        <a href="mailto:youremail@example.com">📧 Email</a>
+      </p>
+    </section>
+  </div>
+
+  <footer>
+    © 2025 Airdrop Hunter — dibuat oleh Asrun
+  </footer>
+
+  <script>
+    /* ---------- helpers & storage ---------- */
+    const KEY = 'ah_projects_v2';
+    function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+    function load(){ try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return []} }
+    function save(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
+
+    // initial sample data
+    let projects = load();
+    if(!projects.length){
+      projects = [
+        { id: uid(), name:'Grass Season 2', link:'', category:'testnet', desc:'Testnet — XP & badge.'},
+        { id: uid(), name:'Entry Network', link:'', category:'social', desc:'Social task & OG roles.'}
+      ];
+      save(projects);
+    }
+
+    /* ---------- rendering ---------- */
+    const projectListEl = document.getElementById('projectList');
+    const searchInput = document.getElementById('searchInput');
+    const filterCategory = document.getElementById('filterCategory');
+
+    function escapeHtml(s=''){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+    function escapeAttr(s=''){ return String(s).replaceAll('"','%22').replaceAll("'",'%27'); }
+
+    function renderProjects(){
+      const q = (searchInput?.value || '').trim().toLowerCase();
+      const cat = filterCategory?.value || 'all';
+      projectListEl.innerHTML = '';
+      const filtered = projects.filter(p=>{
+        const matchQ = p.name.toLowerCase().includes(q) || (p.desc && p.desc.toLowerCase().includes(q));
+        const matchCat = (cat === 'all') ? true : (p.category === cat);
+        return matchQ && matchCat;
+      });
+      if(filtered.length === 0){
+        projectListEl.innerHTML = '<li style="color:#174f3f;padding:6px">Belum ada proyek cocok.</li>';
+        return;
+      }
+      filtered.forEach(p=>{
+        const li = document.createElement('li');
+        li.className = 'proj';
+        li.innerHTML = `
+          <h3>${escapeHtml(p.name)}</h3>
+          <div style="color:#2e7d32;font-size:13px;margin:6px 0">${escapeHtml(p.category)}</div>
+          <p>${escapeHtml(p.desc||'')}</p>
+          <div class="meta">
+            ${p.link ? `<a class="link" href="${escapeAttr(p.link)}" target="_blank">Buka</a>` : ''}
+            <button onclick="startEdit('${p.id}')">Edit</button>
+            <button onclick="deleteProject('${p.id}')">Hapus</button>
+          </div>
+        `;
+        projectListEl.appendChild(li);
+      });
+    }
+
+    /* ---------- CRUD actions ---------- */
+    function toggleAddForm(show=true){
+      const box = document.getElementById('formBox');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+      document.getElementById('inpName').focus();
+    }
+
+    function clearForm(){
+      document.getElementById('editingId').value = '';
+      document.getElementById('inpName').value = '';
+      document.getElementById('inpLink').value = '';
+      document.getElementById('inpDesc').value = '';
+      document.getElementById('inpCat').value = 'testnet';
+    }
+
+    function saveProject(){
+      const id = document.getElementById('editingId').value || null;
+      const name = document.getElementById('inpName').value.trim();
+      if(!name){ alert('Nama proyek wajib diisi'); return; }
+      const link = document.getElementById('inpLink').value.trim();
+      const desc = document.getElementById('inpDesc').value.trim();
+      const category = document.getElementById('inpCat').value;
+
+      const data = { id: id || uid(), name, link, desc, category };
+
+      if(id){
+        projects = projects.map(p=> p.id === id ? data : p);
+      }else{
+        projects.unshift(data); // newest top
+      }
+      save(projects);
+      renderProjects();
+      clearForm();
+      document.getElementById('formBox').style.display = 'none';
+    }
+
+    function startEdit(id){
+      const p = projects.find(x=>x.id===id);
+      if(!p) return alert('Data tidak ditemukan');
+      document.getElementById('editingId').value = p.id;
+      document.getElementById('inpName').value = p.name;
+      document.getElementById('inpLink').value = p.link || '';
+      document.getElementById('inpDesc').value = p.desc || '';
+      document.getElementById('inpCat').value = p.category || 'testnet';
+      document.getElementById('formBox').style.display = 'block';
+      window.scrollTo({top: document.getElementById('search').offsetTop - 60, behavior:'smooth'});
+    }
+
+    function deleteProject(id){
+      if(!confirm('Hapus proyek ini?')) return;
+      projects = projects.filter(x=>x.id !== id);
+      save(projects);
+      renderProjects();
+    }
+
+    function cancelEdit(){
+      clearForm();
+      document.getElementById('formBox').style.display = 'none';
+    }
+
+    function clearAll(){
+      if(!confirm('Reset semua proyek?')) return;
+      projects = [];
+      save(projects);
+      renderProjects();
+    }
+
+    /* ---------- navigation & menu ---------- */
+    function showPage(pageId){
+      document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      // hide mobile menu if open
+      document.getElementById('menu').classList.remove('active');
+      // focus search input automatically when going to search page
+      if(pageId==='search'){
+        setTimeout(()=>{ document.getElementById('searchInput')?.focus(); }, 220);
+      }
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function toggleMenu(){
+      document.getElementById('menu').classList.toggle('active');
+    }
+
+    // wire search/filter inputs
+    const searchInput = document.getElementById('searchInput');
+    const filterCategory = document.getElementById('filterCategory');
+    (searchInput || {}).addEventListener?.('input', renderProjects);
+    (filterCategory || {}).addEventListener?.('change', renderProjects);
+
+    // initial render
+    renderProjects();
+  </script>
+</body>
+</html>

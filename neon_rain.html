@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seila For Everyone Intro</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .container {
+    text-align: center;
+    color: #00ffff;
+    filter: drop-shadow(0 0 15px #00ffff);
+  }
+
+  .text {
+    opacity: 0;
+    font-size: 3em;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    animation: fadeIn 1s ease forwards;
+  }
+
+  .text:nth-child(1) { animation-delay: 0.5s; }
+  .text:nth-child(2) { animation-delay: 1.5s; }
+  .text:nth-child(3) { animation-delay: 2.5s; }
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+  }
+
+  /* Logo SFE muncul setelah teks selesai */
+  .logo {
+    position: absolute;
+    font-size: 4em;
+    opacity: 0;
+    border: 3px solid #00ffff;
+    padding: 20px 40px;
+    border-radius: 10px;
+    letter-spacing: 6px;
+    animation: showLogo 1s ease forwards;
+    animation-delay: 4s;
+  }
+
+  @keyframes showLogo {
+    to { opacity: 1; transform: scale(1); }
+    from { opacity: 0; transform: scale(0.5); }
+  }
+
+  /* Efek RGBY neon */
+  @keyframes rgbGlow {
+    0% { filter: drop-shadow(0 0 15px red); color: red; border-color: red; }
+    25% { filter: drop-shadow(0 0 15px lime); color: lime; border-color: lime; }
+    50% { filter: drop-shadow(0 0 15px blue); color: blue; border-color: blue; }
+    75% { filter: drop-shadow(0 0 15px yellow); color: yellow; border-color: yellow; }
+    100% { filter: drop-shadow(0 0 15px red); color: red; border-color: red; }
+  }
+
+  .logo.animate {
+    animation: rgbGlow 4s linear infinite;
+  }
+
+  /* Pointer bot */
+  .pointer {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 80%;
+    left: 30%;
+    opacity: 0;
+    transform: scale(0);
+    animation: clickLogo 3s ease-in-out forwards;
+    animation-delay: 5.5s;
+  }
+
+  @keyframes clickLogo {
+    0% { opacity: 0; transform: scale(0); }
+    20% { opacity: 1; transform: scale(1) translate(100px, -200px); }
+    50% { transform: scale(1.2) translate(140px, -210px); }
+    70% { transform: scale(1) translate(140px, -210px); opacity: 0.5; }
+    100% { opacity: 0; transform: scale(0); }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="text">Seila</div>
+    <div class="text">For</div>
+    <div class="text">Everyone</div>
+    <div class="logo" id="logo">SFE</div>
+    <div class="pointer"></div>
+  </div>
+
+  <script>
+    // Saat logo muncul, aktifkan efek RGB neon
+    setTimeout(() => {
+      document.getElementById("logo").classList.add("animate");
+    }, 5000);
+  </script>
+</body>
+</html>

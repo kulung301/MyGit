@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Airdrop Hunter — Mint Fresh</title>
+  <style>
+    :root{
+      --bg: #eaf9f1;           /* very light mint */
+      --card: #ffffff;
+      --accent: #2aa67a;       /* mint green */
+      --accent-600: #208a60;
+      --text: #053a35;         /* dark teal */
+      --muted: #577a75;
+      --radius: 12px;
+      --shadow: 0 6px 20px rgba(6,46,40,0.06);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:linear-gradient(180deg,var(--bg),#f7fffb);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:28px;
+    }
+
+    /* Container */
+    .wrap{
+      max-width:1000px;
+      margin:0 auto;
+    }
+
+    header.app{
+      background:transparent;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .logo{
+      width:54px;
+      height:54px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-600));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:700;
+      box-shadow:var(--shadow);
+      font-size:18px;
+    }
+
+    .title h1{
+      margin:0;
+      font-size:20px;
+      letter-spacing:0.2px;
+    }
+    .title p{margin:3px 0 0;font-size:13px;color:var(--muted)}
+
+    /* Controls */
+    .controls{display:flex;gap:10px;align-items:center}
+    .btn{
+      border:none;
+      background:var(--accent);
+      color:#fff;
+      padding:8px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      box-shadow:0 6px 14px rgba(34,118,93,0.12);
+      font-weight:600;
+    }
+    .btn.ghost{
+      background:transparent;color:var(--accent);border:1px solid rgba(42,166,122,0.12);
+      box-shadow:none;
+    }
+
+    main {
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:20px;
+      align-items:start;
+    }
+
+    /* Left: content */
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    h2.section-title{margin:0 0 10px;font-size:16px;color:var(--accent)}
+
+    /* Prose */
+    .prose p{margin:0 0 10px;color:var(--muted);line-height:1.55}
+    .prose ul{margin:8px 0 0;padding-left:18px;color:var(--muted)}
+
+    /* Project area */
+    .projects-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .project-card{
+      background:linear-gradient(180deg, #fff, #fbfffd);
+      border-radius:10px;
+      padding:12px;
+      border:1px solid rgba(5,58,53,0.04);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-height:88px;
+      position:relative;
+    }
+
+    .project-card .name{font-weight:700;color:var(--text)}
+    .project-meta{font-size:13px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+    .tag{background:rgba(42,166,122,0.08);color:var(--accent);padding:4px 8px;border-radius:999px;font-weight:600;font-size:12px}
+
+    .card-actions{
+      display:flex;
+      gap:8px;
+      margin-top:auto;
+    }
+
+    .icon-btn{
+      border:none;background:transparent;cursor:pointer;color:var(--muted);padding:6px;border-radius:8px;
+    }
+    .icon-btn:hover{background:rgba(6,46,40,0.04);color:var(--accent-600)}
+
+    /* Right: form / details */
+    aside .card{position:sticky;top:28px}
+
+    form label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+    form input, form select, form textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid rgba(6,46,40,0.06);
+      font-size:14px;
+      background: #fff;
+      color:var(--text);
+    }
+    form textarea{min-height:100px;resize:vertical}
+
+    .muted-note{font-size:13px;color:var(--muted);margin-top:8px}
+
+    /* small responsive */
+    @media (max-width:980px){
+      main{grid-template-columns:1fr; padding-bottom:36px}
+      aside .card{position:relative;top:auto}
+    }
+
+    /* small animation */
+    .fade-up{animation:fadeUp .36s ease both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="app">
+      <div class="brand">
+        <div class="logo">AH</div>
+        <div class="title">
+          <h1>Airdrop Hunter</h1>
+          <p>Catatan & daftar proyek airdrop pribadi — Mint Fresh</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="add-new-btn">+ Tambah Proyek</button>
+        <button class="btn ghost" id="clear-all-btn" title="Hapus semua proyek (reset)">Reset</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- left content: info + projects -->
+      <section class="card fade-up">
+        <h2 class="section-title">Apa itu Airdrop?</h2>
+        <div class="prose">
+          <p>Airdrop adalah distribusi token gratis dari proyek Web3 untuk memberi insentif kepada pengguna (tester, early adopter, contributor).</p>
+          <p>Bagian di bawah adalah daftar proyek yang sedang saya ikuti — kamu bisa tambah, ubah, atau hapus secara lokal.</p>
+        </div>
+
+        <hr style="border:none;height:12px">
+
+        <h2 class="section-title">Proyek yang Sedang Saya Ikuti</h2>
+        <div id="projects" class="projects-grid" aria-live="polite"></div>
+
+        <p class="muted-note">Catatan: data tersimpan hanya di browser ini (localStorage). Untuk publikasi nanti kita bisa sambungkan ke server.</p>
+      </section>
+
+      <!-- right: form -->
+      <aside>
+        <div class="card fade-up" id="form-card">
+          <h2 class="section-title" id="form-title">Tambah Proyek Baru</h2>
+
+          <form id="project-form">
+            <input type="hidden" id="proj-id" value="">
+            <label for="proj-name">Nama Proyek</label>
+            <input id="proj-name" placeholder="Contoh: Grass Season 2" required>
+
+            <label for="proj-status">Status</label>
+            <select id="proj-status">
+              <option value="Aktif">Aktif</option>
+              <option value="Selesai">Selesai</option>
+              <option value="Tertunda">Tertunda</option>
+            </select>
+
+            <label for="proj-reward">Reward / Catatan singkat</label>
+            <input id="proj-reward" placeholder="Contoh: XP, Badge, OG role">
+
+            <label for="proj-link">Link (opsional)</label>
+            <input id="proj-link" placeholder="https://...">
+
+            <label for="proj-note">Catatan</label>
+            <textarea id="proj-note" placeholder="Tanggal ikut, tugas yang sudah dilakukan, dsb."></textarea>
+
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn" type="submit" id="save-btn">Simpan</button>
+              <button class="btn ghost" type="button" id="cancel-btn">Batal</button>
+            </div>
+          </form>
+
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    // ===== storage key =====
+    const STORAGE_KEY = 'airdropProjects_v1';
+
+    // ===== DOM =====
+    const projectsEl = document.getElementById('projects');
+    const addNewBtn = document.getElementById('add-new-btn');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    const form = document.getElementById('project-form');
+    const formTitle = document.getElementById('form-title');
+    const saveBtn = document.getElementById('save-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+
+    // inputs
+    const inId = document.getElementById('proj-id');
+    const inName = document.getElementById('proj-name');
+    const inStatus = document.getElementById('proj-status');
+    const inReward = document.getElementById('proj-reward');
+    const inLink = document.getElementById('proj-link');
+    const inNote = document.getElementById('proj-note');
+
+    // ===== helper =====
+    const uid = ()=> Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+
+    function loadProjects(){
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return [];
+        return JSON.parse(raw);
+      } catch(e){
+        console.warn('load error',e);
+        return [];
+      }
+    }
+
+    function saveProjects(arr){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    }
+
+    // ===== initial sample (if empty) =====
+    let projects = loadProjects();
+    if(!projects || projects.length === 0){
+      projects = [
+        { id: uid(), name: 'Grass Season 2', status: 'Aktif', reward: 'XP + Badge', link: '', note: 'Ikut testnet, sudah registrasi' },
+        { id: uid(), name: 'Teneo', status: 'Selesai', reward: 'OG Role', link: '', note: 'Claim pending' }
+      ];
+      saveProjects(projects);
+    }
+
+    // ===== render =====
+    function render(){
+      projectsEl.innerHTML = '';
+      if(projects.length === 0){
+        projectsEl.innerHTML = '<div style="color:var(--muted)">Belum ada proyek — klik "Tambah Proyek" untuk mulai.</div>';
+        return;
+      }
+      projects.forEach(p=>{
+        const card = document.createElement('div');
+        card.className = 'project-card fade-up';
+        card.innerHTML = `
+          <div class="name">${escapeHtml(p.name)}</div>
+          <div class="project-meta">
+            <div class="tag">${escapeHtml(p.status)}</div>
+            <div>${escapeHtml(p.reward || '')}</div>
+          </div>
+          <div style="font-size:13px;color:var(--muted);margin-top:6px">${p.note ? escapeHtml(p.note) : ''}</div>
+          <div class="card-actions" style="margin-top:10px">
+            ${p.link ? `<a class="icon-btn" href="${escapeAttr(p.link)}" target="_blank" title="Buka link">🔗</a>` : ''}
+            <button class="icon-btn" title="Edit" data-id="${p.id}" onclick="editProject('${p.id}')">✏️</button>
+            <button class="icon-btn" title="Hapus" data-id="${p.id}" onclick="removeProject('${p.id}')">🗑️</button>
+          </div>
+        `;
+        projectsEl.appendChild(card);
+      });
+    }
+
+    // ===== escape helpers (simple) =====
+    function escapeHtml(s=''){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+    function escapeAttr(s=''){ return String(s).replaceAll('"','%22').replaceAll("'",'%27'); }
+
+    // ===== actions =====
+    addNewBtn.addEventListener('click', ()=> openFormForNew());
+    clearAllBtn.addEventListener('click', ()=>{
+      if(confirm('Yakin hapus semua proyek? (tidak bisa dikembalikan)')) {
+        projects = [];
+        saveProjects(projects);
+        render();
+      }
+    });
+
+    // open form for new
+    function openFormForNew(){
+      inId.value = '';
+      inName.value = '';
+      inStatus.value = 'Aktif';
+      inReward.value = '';
+      inLink.value = '';
+      inNote.value = '';
+      formTitle.textContent = 'Tambah Proyek Baru';
+      saveBtn.textContent = 'Simpan';
+      window.scrollTo({top:0,behavior:'smooth'});
+      inName.focus();
+    }
+
+    // edit
+    window.editProject = function(id){
+      const p = projects.find(x=>x.id===id);
+      if(!p) return alert('Data tidak ditemukan');
+      inId.value = p.id;
+      inName.value = p.name;
+      inStatus.value = p.status;
+      inReward.value = p.reward || '';
+      inLink.value = p.link || '';
+      inNote.value = p.note || '';
+      formTitle.textContent = 'Ubah Proyek';
+      saveBtn.textContent = 'Update';
+      window.scrollTo({top:0,behavior:'smooth'});
+      inName.focus();
+    }
+
+    // remove
+    window.removeProject = function(id){
+      if(!confirm('Hapus proyek ini?')) return;
+      projects = projects.filter(x=>x.id!==id);
+      saveProjects(projects);
+      render();
+    }
+
+    // submit form
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const id = inId.value.trim();
+      const data = {
+        id: id || uid(),
+        name: inName.value.trim() || 'Unnamed',
+        status: inStatus.value,
+        reward: inReward.value.trim(),
+        link: inLink.value.trim(),
+        note: inNote.value.trim()
+      };
+
+      if(id){
+        // update
+        projects = projects.map(p => p.id === id ? data : p);
+      } else {
+        projects.unshift(data); // newest on top
+      }
+      saveProjects(projects);
+      render();
+      openFormForNew(); // clear
+    });
+
+    cancelBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      openFormForNew();
+    });
+
+    // initial render
+    render();
+  </script>
+</body>
+</html>

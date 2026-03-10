@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFE Intro</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: #000;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .container {
+    text-align: center;
+    position: relative;
+    color: white;
+    font-weight: 900;
+    letter-spacing: 2px;
+  }
+
+  .text {
+    font-size: 5vw;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: showText 1s forwards;
+  }
+
+  .text:nth-child(1) {
+    animation-delay: 0.5s;
+  }
+  .text:nth-child(2) {
+    animation-delay: 1.5s;
+  }
+  .text:nth-child(3) {
+    animation-delay: 2.5s;
+  }
+
+  @keyframes showText {
+    0% { opacity: 0; transform: translateY(50px) skewY(10deg); }
+    100% { opacity: 1; transform: translateY(0) skewY(0deg); }
+  }
+
+  /* Potongan diagonal */
+  .text span {
+    position: relative;
+    display: inline-block;
+    color: white;
+    background: linear-gradient(180deg, white 49%, black 51%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    mix-blend-mode: lighten;
+  }
+
+  /* Logo final */
+  .logo {
+    position: absolute;
+    font-size: 6vw;
+    font-weight: 900;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    color: #0ff;
+    text-shadow: 0 0 20px #0ff, 0 0 40px #0ff;
+    animation: showLogo 2s ease-out forwards;
+    animation-delay: 4s;
+  }
+
+  @keyframes showLogo {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotateY(90deg); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotateY(0deg); }
+  }
+
+  /* Efek klik bot */
+  .cursor {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ff0, #f00);
+    box-shadow: 0 0 10px #f00, 0 0 30px #ff0;
+    top: 70%;
+    left: 45%;
+    opacity: 0;
+    animation: clickBot 3s ease-out forwards;
+    animation-delay: 5.2s;
+  }
+
+  @keyframes clickBot {
+    0% { opacity: 0; transform: translate(0, 0) scale(1); }
+    20% { opacity: 1; transform: translate(80px, -80px) scale(1.5); }
+    50% { opacity: 1; transform: translate(100px, -100px) scale(0.8); }
+    100% { opacity: 0; transform: translate(100px, -100px) scale(0); }
+  }
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="text"><span>Seila</span></div>
+    <div class="text"><span>For</span></div>
+    <div class="text"><span>Everyone</span></div>
+    <div class="logo">SFE</div>
+    <div class="cursor"></div>
+  </div>
+</body>
+</html>
