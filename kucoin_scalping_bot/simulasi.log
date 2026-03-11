@@ -1,9 +1,0 @@
-2026-03-11 10:14:42,001 | Bot simulasi dimulai...
-2026-03-11 10:15:02,295 | Error koneksi: HTTPSConnectionPool(host='api.kucoin.com', port=443): Read timed out. (read timeout=10)
-2026-03-11 10:15:19,907 | Error koneksi: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
-2026-03-11 10:15:40,094 | Error koneksi: HTTPSConnectionPool(host='api.kucoin.com', port=443): Max retries exceeded with url: /api/v1/market/candles?symbol=BTC-USDT&type=5min (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1032)')))
-2026-03-11 10:15:50,333 | Error koneksi: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
-2026-03-11 10:16:03,552 | Error koneksi: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
-2026-03-11 10:16:33,584 | Error koneksi: HTTPSConnectionPool(host='api.kucoin.com', port=443): Max retries exceeded with url: /api/v1/market/candles?symbol=BTC-USDT&type=5min (Caused by ConnectTimeoutError(<HTTPSConnection(host='api.kucoin.com', port=443) at 0x7e152f8cd0>, 'Connection to api.kucoin.com timed out. (connect timeout=10)'))
-2026-03-11 10:17:01,224 | Error koneksi: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
-2026-03-11 10:17:11,480 | Error koneksi: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
