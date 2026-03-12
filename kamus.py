@@ -347,7 +347,7 @@ def main(stdscr):
             stdscr.attroff(curses.color_pair(13))
 
         # ── INFO BARIS ───────────────────────────────────────────────────────
-        info = f" {len(flat)} perintah  |  ↑↓ Navigasi  |  / Cari  |  Enter Detail  |  q Keluar "
+        info = f" {len(flat)} perintah  |  ↑↓ Navigasi  |  s Cari  |  Enter Detail  |  k Keluar "
         stdscr.attron(curses.color_pair(13))
         stdscr.addstr(2, 0, info[:w-1])
         stdscr.attroff(curses.color_pair(13))
@@ -425,7 +425,7 @@ def main(stdscr):
             rendered += 1
 
         # ── FOOTER ──────────────────────────────────────────────────────────
-        footer = " [/] Cari  [↑↓] Navigasi  [Enter] Detail  [Esc] Reset  [q] Keluar "
+        footer = " [s] Cari  [↑↓] Navigasi  [Enter] Detail  [Esc] Reset  [k] Keluar "
         stdscr.attron(curses.color_pair(15))
         stdscr.addstr(h-1, 0, footer[:w-1])
         stdscr.attroff(curses.color_pair(15))
@@ -454,9 +454,9 @@ def main(stdscr):
                 state["cursor"] = 0
                 state["offset"] = 0
         else:
-            if key in (ord('q'), ord('Q')):
+            if key in (ord('k'), ord('K')):
                 return
-            elif key == ord('/'):
+            elif key == ord('s'):
                 state["search_mode"] = True
             elif key == 27:
                 state["query"] = ""
@@ -555,13 +555,13 @@ def show_detail(stdscr, item):
 
         # Footer
         stdscr.attron(curses.color_pair(15))
-        stdscr.addstr(h-1, 0, " [Esc / q / ←] Kembali ke daftar ".ljust(w-1))
+        stdscr.addstr(h-1, 0, " [Esc / k / ←] Kembali ke daftar ".ljust(w-1))
         stdscr.attroff(curses.color_pair(15))
 
         stdscr.refresh()
 
         key = stdscr.getch()
-        if key in (27, ord('q'), ord('Q'), curses.KEY_LEFT, curses.KEY_BACKSPACE):
+        if key in (27, ord('k'), ord('K'), curses.KEY_LEFT, curses.KEY_BACKSPACE):
             break
 
 # ─── ENTRY POINT ───────────────────────────────────────────────────────────────
